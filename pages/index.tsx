@@ -19,7 +19,6 @@ export default function Home() {
   // Check if user is logged in on component mount
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    console.log({ token });
     if (!token) {
       router.push("/login");
     } else {
@@ -40,7 +39,7 @@ export default function Home() {
       setSurveyId(response.data.surveyId);
       setTitle("");
     } catch (error) {
-      console.log("Failed to generate questions:", error);
+      // console.log("Failed to generate questions:", error);
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +53,7 @@ export default function Home() {
       const response = await api.get("/ai/suggest-titles");
       setTitles(response.data);
     } catch (error) {
-      console.log("Failed to get title suggestion:", error);
+      // console.log("Failed to get title suggestion:", error);
     } finally {
       setIsSuggestionLoading(false);
     }
@@ -72,7 +71,7 @@ export default function Home() {
       setQuestions([]);
       setShowSuccessMessage(true);
     } catch (error) {
-      console.log("Failed to submit responses:", error);
+      // console.log("Failed to submit responses:", error);
     } finally {
       setIsSubmitResponseLoading(false);
     }
@@ -89,238 +88,150 @@ export default function Home() {
     return null;
   }
 
-  console.log({ questions });
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: "2rem",
-        backgroundColor: "#f5f5f5",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          backgroundColor: "white",
-          padding: "2rem",
-          borderRadius: "10px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-          }}
-        >
-          <h1 style={{ margin: 0, color: "#333" }}>Question Generator</h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-5xl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 tracking-tight">
+              Question Generator
+            </h1>
+            <p className="text-slate-300 text-sm sm:text-base">
+              Generate and respond to random questions by giving a title
+            </p>
+          </div>
           <button
             onClick={handleLogout}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#4285f4",
-              color: "white",
-              border: "none",
-              borderRadius: "20px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
+            className="px-6 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-full font-medium 
+                     hover:bg-white/20 transform hover:-translate-y-0.5 transition-all 
+                     duration-200 shadow-lg hover:shadow-xl border border-white/20
+                     disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Logout
           </button>
         </div>
 
-        <div style={{ marginBottom: "2rem" }}>
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              marginBottom: "1rem",
-            }}
-          >
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter a title for your questions..."
-              style={{
-                flex: 1,
-                padding: "10px",
-                borderRadius: "5px",
-                border: "1px solid #ddd",
-                fontSize: "16px",
-                backgroundColor: "#f8f9fa",
-                color: "#333",
-              }}
-            />
+        {/* Main Content */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 sm:p-8 lg:p-10">
+          {/* Input Section */}
+          <div className="space-y-6 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter a title for your interview questions..."
+                className="flex-1 px-6 py-4 rounded-xl border-2 border-white/20 
+                         focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 
+                         outline-none transition-all duration-200 bg-white/5 
+                         text-white placeholder-slate-400 text-lg"
+              />
+              <button
+                onClick={handleGetTitleSuggestion}
+                disabled={isSuggestionLoading}
+                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium 
+                         hover:from-purple-600 hover:to-pink-600 transform hover:-translate-y-0.5 
+                         transition-all duration-200 shadow-lg hover:shadow-xl
+                         disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {isSuggestionLoading
+                  ? "Getting Suggestion..."
+                  : "Get Suggestion"}
+              </button>
+            </div>
             <button
-              onClick={handleGetTitleSuggestion}
-              disabled={isSuggestionLoading}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#34a853",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              onClick={handleGenerateQuestions}
+              disabled={isLoading || !title}
+              className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium 
+                       hover:from-blue-600 hover:to-indigo-600 transform hover:-translate-y-0.5 
+                       transition-all duration-200 shadow-lg hover:shadow-xl
+                       disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             >
-              {isSuggestionLoading ? "Getting Suggestion" : "Get Suggestion"}
+              {isLoading ? "Generating Questions..." : "Generate Questions"}
             </button>
           </div>
-          <button
-            onClick={handleGenerateQuestions}
-            disabled={isLoading || !title}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: "#4285f4",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: isLoading || !title.trim() ? "not-allowed" : "pointer",
-              fontSize: "16px",
-              opacity: isLoading || !title.trim() ? 0.7 : 1,
-            }}
-          >
-            {isLoading ? "Generating..." : "Generate Questions"}
-          </button>
+
+          {/* Title Suggestions */}
+          {titles && titles.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {titles.map((title, index) => (
+                <button
+                  key={index}
+                  onClick={() => setTitle(title)}
+                  className="p-4 bg-white/5 text-white border-2 border-white/20 
+                           rounded-xl text-left font-medium hover:bg-white/10 
+                           hover:border-purple-400 transform hover:-translate-y-0.5 
+                           transition-all duration-200 backdrop-blur-sm"
+                >
+                  {title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Questions Section */}
+          {questions.length > 0 && (
+            <div className="space-y-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 tracking-tight">
+                Generated Interview Questions
+              </h2>
+              {questions.map((question, index) => (
+                <div
+                  key={index}
+                  className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border-2 border-white/20 
+                           hover:border-purple-400 transform hover:-translate-y-0.5 
+                           transition-all duration-200"
+                >
+                  <p className="mb-4 font-semibold text-white text-xl">
+                    {index + 1}. {question}
+                  </p>
+                  <textarea
+                    value={answers[index] || ""}
+                    onChange={(e) => {
+                      const newAnswers = [...answers];
+                      newAnswers[index] = e.target.value;
+                      setAnswers(newAnswers);
+                    }}
+                    placeholder="Enter your response here..."
+                    className="w-full min-h-[120px] p-4 rounded-xl border-2 border-white/20 
+                             focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 
+                             outline-none transition-all duration-200 bg-white/5 
+                             text-white placeholder-slate-400 resize-y"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          {questions.length > 0 && (
+            <button
+              onClick={handleSubmitResponse}
+              disabled={isSubmitResponseLoading || answers.length === 0}
+              className="w-full mt-8 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-medium 
+                       hover:from-emerald-600 hover:to-teal-600 transform hover:-translate-y-0.5 
+                       transition-all duration-200 shadow-lg hover:shadow-xl
+                       disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            >
+              {isSubmitResponseLoading
+                ? "Submitting Response..."
+                : "Submit Response"}
+            </button>
+          )}
+
+          {/* Success Message */}
+          {showSuccessMessage && (
+            <div
+              className="mt-6 p-4 bg-emerald-500/20 backdrop-blur-sm text-emerald-200 rounded-xl 
+                         border-2 border-emerald-500/30 flex items-center justify-center 
+                         font-medium animate-fade-in"
+            >
+              <span className="mr-2">✨</span>
+              Response successfully recorded!
+            </div>
+          )}
         </div>
-
-        {titles && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "1rem",
-              marginBottom: "2rem",
-            }}
-          >
-            {titles.map((title, index) => (
-              <button
-                key={index}
-                onClick={() => setTitle(title)}
-                style={{
-                  padding: "10px 15px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#333",
-                  border: "1px solid #ddd",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  transition: "all 0.2s ease",
-                  textAlign: "left",
-                  width: "100%",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#e9ecef";
-                  e.currentTarget.style.borderColor = "#4285f4";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f8f9fa";
-                  e.currentTarget.style.borderColor = "#ddd";
-                }}
-              >
-                {title}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {questions.length > 0 && (
-          <div>
-            <h2 style={{ marginBottom: "1rem", color: "#333" }}>
-              Generated Questions
-            </h2>
-            {questions.map((question, index) => (
-              <div
-                key={index}
-                style={{
-                  marginBottom: "1rem",
-                  padding: "1rem",
-                  backgroundColor: "#f8f9fa",
-                  color: "#333",
-                  borderRadius: "5px",
-                }}
-              >
-                <p style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>
-                  {index + 1}. {question}
-                </p>
-                <textarea
-                  value={answers[index] || ""}
-                  onChange={(e) => {
-                    const newAnswers = [...answers];
-                    newAnswers[index] = e.target.value;
-                    setAnswers(newAnswers);
-                  }}
-                  placeholder="Enter your answer..."
-                  style={{
-                    width: "100%",
-                    minHeight: "100px",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    border: "1px solid #ddd",
-                    resize: "vertical",
-                    backgroundColor: "#f8f9fa",
-                    color: "#333",
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {questions.length > 0 && (
-          <button
-            onClick={handleSubmitResponse}
-            disabled={isSubmitResponseLoading || answers.length === 0}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: "#4285f4",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor:
-                isSubmitResponseLoading || answers.length === 0
-                  ? "not-allowed"
-                  : "pointer",
-              fontSize: "16px",
-              opacity:
-                isSubmitResponseLoading || answers.length === 0 ? 0.7 : 1,
-              marginTop: "1rem",
-            }}
-          >
-            {isSubmitResponseLoading
-              ? "Submitting Response..."
-              : "Submit Response"}
-          </button>
-        )}
-
-        {showSuccessMessage && (
-          <div
-            style={{
-              backgroundColor: "#d4edda",
-              color: "#155724",
-              padding: "1rem",
-              borderRadius: "5px",
-              marginTop: "1rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "1px solid #c3e6cb",
-              fontSize: "16px",
-              fontWeight: 500,
-            }}
-          >
-            ✅ Response successfully recorded!
-          </div>
-        )}
       </div>
     </div>
   );
